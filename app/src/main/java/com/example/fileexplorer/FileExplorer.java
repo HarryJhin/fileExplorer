@@ -2,6 +2,8 @@ package com.example.fileexplorer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -51,9 +53,15 @@ public class FileExplorer extends AppCompatActivity {
                     }
                     String Path = mCurrent + "/" + Name;
                     File f = new File(Path);
-                    if (f.isDirectory()) {
+                    if (f.isDirectory()) {  // 디렉토리일 때
                         mCurrent = Path;
                         refreshFiles();
+                    } else if (f.isFile()) { // 파일일 때
+                        // 암시적 인텐트
+                        Uri _path = Uri.fromFile(f);
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(_path, "application");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     } else {
                         Toast.makeText(FileExplorer.this, arFiles.get(position),
                                 Toast.LENGTH_SHORT).show();
@@ -75,6 +83,27 @@ public class FileExplorer extends AppCompatActivity {
                     String uppath = mCurrent.substring(0, end);
                     mCurrent = uppath;
                     refreshFiles();
+                }
+                break;
+            case R.id.btnadd:
+                File current = new File(mCurrent + "/새 폴더");
+                if (current.mkdirs()) {
+                    Toast.makeText(this, "Create Folder", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Fail", Toast.LENGTH_SHORT).show();
+                }
+                refreshFiles();
+                break;
+            case R.id.btndelete:
+                File folder = new File(mCurrent);
+                if (folder.delete()) {
+                    Toast.makeText(this, "Delete Folder", Toast.LENGTH_SHORT).show();
+                    int end = mCurrent.lastIndexOf("/");
+                    String uppath = mCurrent.substring(0, end);
+                    mCurrent = uppath;
+                    refreshFiles();
+                } else {
+                    Toast.makeText(this, "Fail", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
